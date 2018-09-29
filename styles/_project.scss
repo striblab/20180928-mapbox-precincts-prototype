@@ -1,0 +1,93 @@
+/********** TOOLTIPS **********/
+
+.mapboxgl-popup {
+  position: absolute;
+  top:-15px;
+  max-width: 160px;
+  background-color: white;
+  font-size:1em;
+  border: 1px solid #565656;
+  border-radius: 2px;
+  padding: 0.5em;
+
+  @media only screen and (max-width: 400px) {
+    display:none!important;
+  }
+}
+
+.mapboxgl-popup .mapboxgl-popup-tip {
+    border:none;
+}
+
+.mapboxgl-popup .mapboxgl-popup-content {
+    border:none;
+    margin:0 0 0 0;
+    padding:0 0 0 0;
+    box-shadow: none;
+    border-radius:0px;
+}
+
+.mapboxgl-popup h4 {
+  text-align:left;
+  padding-top: 0;
+  margin-top: 0;
+  font-size: 1.1em !important;
+  margin-bottom:3px;
+}
+
+.mapboxgl-popup .winner2016 {
+  font-size:0.9em;
+  text-align:left;
+  color:#686868;
+  margin-bottom:3px;
+}
+
+
+.mapboxgl-popup table {
+    margin-bottom:0.5em;
+}
+
+.mapboxgl-popup th {
+  font-size: 0.9em;
+  text-transform:uppercase;
+  font-weight:normal;
+}
+
+.mapboxgl-popup th.right {
+  text-align:right;
+}
+
+.mapboxgl-popup td {
+  font-size: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 0.4em;
+  padding-left:2px;
+}
+
+.mapboxgl-popup td.right {
+  text-align:right;
+}
+
+.mapboxgl-popup.hidden {
+  display: none;
+}
+
+.mapboxgl-popup .label-d {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 2px;
+  margin-right: 5px;
+  background-color:#0258A0;
+}
+
+.mapboxgl-popup .label-r {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 2px;
+  margin-right: 5px;
+  background-color:#C0272D;
+}
