@@ -22,4 +22,4 @@ let state = turf.polygon(
 
 let mask = polyMask(state, bounds);
 
-Fs.writeFile('./mn-mask.json', JSON.stringify(mask));
+Fs.writeFile('./mapbox/mn-mask.json', JSON.stringify(mask));
