@@ -4,9 +4,7 @@ wget ftp://ftp.gisdata.mn.gov/pub/gdrs/data/pub/us_mn_state_sos/bdry_votingdistr
   shp2json bdry_votingdistricts.shp | \
   mapshaper - -quiet -proj longlat from=bdry_votingdistricts.prj -o ./bdry_votingdistricts.json format=geojson && \
   cat bdry_votingdistricts.json | \
-  geo2topo precincts=- | \
-  toposimplify -f -p 0.005 | \
-  topoquantize 1e5 > ./mn-precincts-longlat.tmp.json && \
+  geo2topo precincts=- > ./mn-precincts-longlat.tmp.json && \
   rm bdry_votingdistricts.* && \
   rm -rf ./metadata && \
   rm shp_bdry_votingdistricts.* &&
