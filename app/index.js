@@ -38,10 +38,9 @@ const map = new mapboxgl.Map({
   scrollZoom: false
 });
 
-// map.addControl(new mapboxgl.NavigationControl());
-// map.addControl(new mapboxgl.FullscreenControl());
-// map.dragRotate.disable();
-// map.touchZoomRotate.disableRotation();
+map.addControl(new mapboxgl.NavigationControl());
+map.dragRotate.disable();
+map.touchZoomRotate.disableRotation();
 
 map.on('load', function() {
   var popup = new mapboxgl.Popup({
@@ -72,10 +71,8 @@ map.on('load', function() {
 });
 
 // Todo:
-// ADD, STYLE CONTROLS
-// CLEAN UP CODE
-// RESPONSIVENESS
-// ADDRESS SEARCH
 // LAY OUT PAGE
+// ADDRESS SEARCH
+// RESPONSIVENESS
 // TWEAK BOUNDS
 // TUNE BASEMAP STYLES (labels, etc.)
