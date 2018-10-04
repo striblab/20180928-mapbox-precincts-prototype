@@ -48,7 +48,7 @@ ndjson-join '1' '1' <(ndjson-cat mn-precincts-longlat.tmp.json) <(cat mn-precinc
 topo2geo precincts=mn-precincts-geo.json < mn-precincts-final.json &&
 
 echo "Creating MBtiles for Mapbox upload ..."
-tippecanoe -o ./mapbox/mn_election_results_2016.mbtiles -Z 2 -z 13 ./mn-precincts-geo.json &&
+tippecanoe -o ./mapbox/mn_election_results_2016.mbtiles -Z 2 -z 13 --generate-ids ./mn-precincts-geo.json &&
 
 echo "Cleaning up ..."
 rm *.tmp.csv
