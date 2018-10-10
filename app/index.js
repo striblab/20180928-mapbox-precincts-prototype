@@ -34,7 +34,7 @@ const map = new mapboxgl.Map({
   style: 'mapbox://styles/cjdd3b/cjmt2qdtt1bvv2stn3fp6bt33',
   center: [-94.6859, 47.7296],
   zoom: 2,
-  maxBounds: [-97.2, 43.4, -89.5, 49.5],
+  maxBounds: [-97.25, 43.4, -89.53, 49.5],
   scrollZoom: false
 });
 
@@ -43,7 +43,7 @@ map.addControl(new mapboxgl.NavigationControl());
 // Make and attach geocoder
 var geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
-    bbox: [-97.2, 43.4, -89.5, 49.5],
+    bbox: [-97.25, 43.4, -89.53, 49.5],
     zoom: 12,
     placeholder: "Search for an address"
 });
@@ -59,6 +59,14 @@ map.on('load', function() {
   });
 
   let hoveredStateId = null;
+
+  map.on('zoom', function() {
+    if (map.getZoom() < 7) {
+      map.dragPan.disable();
+    } else {
+      map.dragPan.enable();
+    }
+  });
 
   map.on('mousemove', 'mnprecinctsgeo', function(e) {
 
@@ -122,6 +130,5 @@ map.on('load', function() {
 // RESPONSIVENESS
 // OPTIMIZE HOVER
 // STYLE GEOCODE, ETC.
-// TWEAK BOUNDS
-// TUNE BASEMAP STYLES (labels, etc.)
+// KEEP POLISHING STUDIO STYLES
 // LAUNCH EARLY CONCEPT

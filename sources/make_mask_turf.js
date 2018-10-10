@@ -5,7 +5,7 @@ const turf = require("@turf/turf");
 const topojson = require("topojson");
 const mn = require('./mn-counties.json');
 
-let bounds = [-97.2, 43.4, -89.5, 49.5];
+let bounds = [-97.5, 43.4, -89.5, 49.5];
 
 /********** HELPER FUNCTIONS **********/
 
