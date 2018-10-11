@@ -69,30 +69,7 @@ map.on('load', function() {
   });
 
   map.on('mousemove', 'mnprecinctsgeo', function(e) {
-
     map.getCanvas().style.cursor = 'pointer';
-    if (e.features.length > 0) {
-      if (hoveredStateId) {
-        // set the hover attribute to false with feature state
-        map.setFeatureState({
-          source: 'composite',
-          sourceLayer: 'mnprecinctsgeo',
-          id: hoveredStateId
-        }, {
-          hover: false
-        });
-      }
-
-      hoveredStateId = e.features[0].id;
-      // set the hover attribute to true with feature state
-      map.setFeatureState({
-        source: 'composite',
-        id: hoveredStateId,
-        sourceLayer: 'mnprecinctsgeo'
-      }, {
-        hover: true
-      });
-    }
 
     var coordinates = e.features[0].geometry.coordinates.slice();
 
@@ -100,8 +77,6 @@ map.on('load', function() {
     var precinct = e.features[0].properties.precinct;
     var dfl = e.features[0].properties.dfl_votes;
     var gop = e.features[0].properties.gop_votes;
-
-    // console.log(e.features[0]);
 
     // Populate the popup and set its coordinates
     // based on the feature found.
@@ -111,16 +86,6 @@ map.on('load', function() {
   });
 
   map.on('mouseleave', 'mnprecinctsgeo', function() {
-    if (hoveredStateId) {
-      map.setFeatureState({
-        source: 'composite',
-        id: hoveredStateId,
-        sourceLayer: 'mnprecinctsgeo'
-      }, {
-        hover: false
-      });
-    }
-    hoveredStateId =  null;
     popup.remove();
   });
 
@@ -128,7 +93,6 @@ map.on('load', function() {
 
 // Todo:
 // RESPONSIVENESS
-// OPTIMIZE HOVER
+// DEVELOP EARLY CONCEPT
 // STYLE GEOCODE, ETC.
 // KEEP POLISHING STUDIO STYLES
-// LAUNCH EARLY CONCEPT
