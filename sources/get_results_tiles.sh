@@ -47,7 +47,17 @@ ndjson-join '1' '1' <(ndjson-cat mn-precincts-longlat.tmp.json) <(cat mn-precinc
   ndjson-map '{"type": d[0].type, "bbox": d[0].bbox, "transform": d[0].transform, "objects": {"precincts": {"type": "GeometryCollection", "geometries": d[1].geometries}}, "arcs": d[0].arcs}' > mn-precincts-final.json &&
 topo2geo precincts=mn-precincts-geo.json < mn-precincts-final.json &&
 
-echo "Creating MBtiles for Mapbox upload ..."
+echo "Creating SVG for print ..." &&
+mapshaper mn-precincts-geo.json \
+  -quiet \
+  -proj albersusa \
+  -colorizer name=calcFill colors='#c0272d,#0258a0,#dfdfdf,#dfdfdf' categories='trump,clinton,even,null' \
+  -colorizer name=calcOpacity colors='0.1,0.25,0.5,0.75,1,1' breaks=10,25,100,500,100000 \
+  -style fill='calcFill(winner2016)' opacity='calcOpacity(votes_sqmi)' \
+  -o mn-precincts-2016.svg &&
+
+echo "Creating MBtiles for Mapbox upload ..." &&
+rm ./mapbox/mn_election_results_2016.mbtiles &&
 tippecanoe -o ./mapbox/mn_election_results_2016.mbtiles -Z 2 -z 13 --generate-ids ./mn-precincts-geo.json &&
 
 echo "Cleaning up ..."

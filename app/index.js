@@ -28,6 +28,11 @@ function makeTooltip(precinct, dfl, gop) {
   return html;
 }
 
+// Adaptive map height
+var mapHeight = window.innerWidth * 1.07
+document.getElementById("map").style.height = mapHeight.toString() + "px";
+
+
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltdnpvOWgifQ.aPWEg8C-5IJ0_7cXusY-1g';
 const map = new mapboxgl.Map({
   container: 'map',
@@ -51,6 +56,7 @@ document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
 map.dragRotate.disable();
 map.touchZoomRotate.disableRotation();
+map.dragPan.disable();
 
 map.on('load', function() {
   var popup = new mapboxgl.Popup({
@@ -93,6 +99,8 @@ map.on('load', function() {
 
 // Todo:
 // RESPONSIVENESS
-// DEVELOP EARLY CONCEPT
+// MOBILE BEHAVIOR DONE
+// LEGEND
 // STYLE GEOCODE, ETC.
+// MULTIPLE LAYERS FOR DIFF RACES?
 // KEEP POLISHING STUDIO STYLES
