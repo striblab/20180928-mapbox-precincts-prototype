@@ -32,7 +32,6 @@ function makeTooltip(precinct, dfl, gop) {
 var mapHeight = window.innerWidth * 1.07
 document.getElementById("map").style.height = mapHeight.toString() + "px";
 
-
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltdnpvOWgifQ.aPWEg8C-5IJ0_7cXusY-1g';
 const map = new mapboxgl.Map({
   container: 'map',
@@ -98,8 +97,7 @@ map.on('load', function() {
 });
 
 // Todo:
-// RESPONSIVENESS
-// MOBILE BEHAVIOR DONE
+// MOBILE BEHAVIOR
 // LEGEND
 // STYLE GEOCODE, ETC.
 // MULTIPLE LAYERS FOR DIFF RACES?
