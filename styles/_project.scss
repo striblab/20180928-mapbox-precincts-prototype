@@ -54,6 +54,10 @@ section.leadin {
   margin-bottom:40px;
 }
 
+#map-container {
+  position:relative;
+}
+
 /********** TOOLTIPS **********/
 
 .mapboxgl-popup {
@@ -146,4 +150,81 @@ section.leadin {
   margin-left: 2px;
   margin-right: 5px;
   background-color:#C0272D;
+}
+
+/********** POPOVERS *********/
+
+#map-popover{
+  position:absolute;
+  width:100%;
+  bottom:0;
+  background-color:white;
+  padding:10px 10px 10px 10px;
+  z-index:100;
+  visibility:hidden;
+  width:95%;
+  border:1px solid black;
+  left: 50%;
+  transform: translate(-50%, 0);
+
+  .label-d {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 2px;
+    margin-right: 5px;
+    background-color:#0258A0;
+  }
+
+  .label-r {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 2px;
+    margin-right: 5px;
+    background-color:#C0272D;
+  }  
+
+  table {
+      margin-bottom:0em;
+  }
+
+  th {
+    font-size: 0.9em;
+    text-transform:uppercase;
+    font-weight:normal;
+  }
+
+
+  td {
+    font-size: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.4em;
+  }
+
+  #popover-header {
+    margin-bottom:5px;
+  
+    h4 {
+      float:left;
+      text-align:left;
+      padding-top: 0;
+      margin-top: 0;
+      font-size: 1.1em !important;
+      margin-bottom:px;
+    }
+
+    #close {
+      width:10px;
+      float:right;
+      text-align:left;
+      padding-top: 0;
+      margin-top: 0;
+      margin-right:5px;
+      font-size: 1.1em !important;
+      margin-bottom:3px;
+    }
+  }
 }
