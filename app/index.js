@@ -3,75 +3,24 @@
  */
 
 import Popover from './shared/popover.js';
+import StribPopup from './shared/popup.js';
+import utilsFn from './utils.js';
 
-var isMobile = {
-  Android: function() {
-    return navigator.userAgent.match(/Android/i);
-  },
-  BlackBerry: function() {
-    return navigator.userAgent.match(/BlackBerry/i);
-  },
-  iOS: function() {
-    return navigator.userAgent.match(/iPhone|iPad|iPod/i);
-  },
-  Opera: function() {
-    return navigator.userAgent.match(/Opera Mini/i);
-  },
-  Windows: function() {
-    return navigator.userAgent.match(/IEMobile/i);
-  },
-  any: function() {
-    return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
-  }
-};
+/********** CONSTANTS **********/
 
-function makeTooltip(precinct, dfl, gop) {
-  var html = '<div class=".mapboxgl-popup"> \
-    <h4 id="title">' + precinct + '</h4> \
-    <table> \
-      <thead> \
-        <tr> \
-          <th>Party</th> \
-          <th class="right">Votes</th> \
-        </tr> \
-      </thead> \
-      <tbody> \
-        <tr> \
-          <td><span class="label-d"></span>Dayton</td> \
-          <td id="votes-d" class="right">' + dfl + '</td> \
-        </tr> \
-        <tr> \
-          <td><span class="label-r"></span>Johnson</td> \
-          <td id="votes-r" class="right">' + gop + '</td> \
-        </tr>\
-      </tbody> \
-    </table> \
-  </div>'
+const adaptive_ratio = 1.07; // Height/width ratio for adaptive map sizing
+const popover_thresh = 500; // The width of the map when tooltips turn to popvers
+const utils = utilsFn({});
 
-  return html;
-}
+mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltdnpvOWgifQ.aPWEg8C-5IJ0_7cXusY-1g';
 
-function placeTooltip(e, popup) {
-  var coordinates = e.features[0].geometry.coordinates.slice();
+/********** INITIALIZE MAP **********/
 
-  // Popup components
-  var precinct = e.features[0].properties.precinct;
-  var dfl = e.features[0].properties.dfl_votes;
-  var gop = e.features[0].properties.gop_votes;
-
-  // Populate the popup and set its coordinates
-  // based on the feature found.
-  popup.setLngLat(e.lngLat)
-    .setHTML(makeTooltip(precinct, dfl, gop))
-    .addTo(map);
-}
-
-// Adaptive map height
-var mapHeight = window.innerWidth * 1.07
+// Set adaptive sizing
+var mapHeight = window.innerWidth * adaptive_ratio;
 document.getElementById("map").style.height = mapHeight.toString() + "px";
 
 // Init map
-mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltdnpvOWgifQ.aPWEg8C-5IJ0_7cXusY-1g';
 const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/cjdd3b/cjmt2qdtt1bvv2stn3fp6bt33',
@@ -81,8 +30,8 @@ const map = new mapboxgl.Map({
   scrollZoom: false
 });
 
-// Basic options and setup
-if (isMobile.any()) {
+// Setup of basic features
+if (utils.isMobile()) {
   map.dragRotate.disable();
   map.touchZoomRotate.disableRotation();
 } else {
@@ -90,6 +39,8 @@ if (isMobile.any()) {
   map.dragPan.disable();
   map.getCanvas().style.cursor = 'pointer';
 }
+
+/********** INITIALIZE GEOCODER **********/
 
 // Make and attach geocoder
 var geocoder = new MapboxGeocoder({
@@ -100,17 +51,15 @@ var geocoder = new MapboxGeocoder({
 });
 document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
+/********** MAP BEHAVIORS **********/
+
 // Onload behaviors
 map.on('load', function() {
-  var popup = new mapboxgl.Popup({
-    closeButton: false,
-    closeOnClick: false,
-    offset: 30
-  });
-
+  // Init popups and popovers
+  var popup = new StribPopup(map);
   var popover = new Popover('#map-popover');
 
-  // Handlers
+  // Only allow dragpan after you zoom in
   map.on('zoom', function() {
     if (map.getZoom() < 5 ) {
       map.dragPan.disable();
@@ -119,44 +68,34 @@ map.on('load', function() {
     }
   });
 
-  // Capture mousemove events on desktop and touch on mobile or small viewports
-  if ((window.innerWidth <= 500 || document.body.clientWidth <= 500) || isMobile.any()) {
+  // Capture mousemove events on desktop and touch/block on mobile or small viewports
+  if ((window.innerWidth <= popover_thresh || document.body.clientWidth <= popover_thresh) || utils.isMobile()) {
     map.on('click', 'mnprecinctsgeo', function(e) {
-      // Popup components
+      // Create and populate popover if mobile or small viewport
       var precinct = e.features[0].properties.precinct;
       var dfl_votes = e.features[0].properties.dfl_votes;
       var gop_votes = e.features[0].properties.gop_votes;
       var dfl_pct = e.features[0].properties.dfl_pct;
       var gop_pct = e.features[0].properties.gop_pct;
 
-      // Populate the popup and set its coordinates
-      // based on the feature found.
       popover.open(precinct, dfl_votes, gop_votes, dfl_pct, gop_pct);
 
-      // Scroll into view if popover is off the screen
+      // Scroll into view if popover is off the screen. jQuery assumed to
+      // be on page because of Strib environment.
       if (!popover.is_in_viewport()) {
-        console.log('scrollio')
         $('html, body').animate({
           'scrollTop' : $("#map").offset().top
         });
       }
     });
+  // Handle mouseover events in desktop and non-mobile viewports
   } else {
     map.on('mousemove', 'mnprecinctsgeo', function(e) {
-      var f = map.queryRenderedFeatures(e.point)[0];
-      placeTooltip(e, popup);
+      popup.open(e);
     });
 
     map.on('mouseleave', 'mnprecinctsgeo', function() {
-      popup.remove();
+      popup.close();
     });
   }
 });
-
-// Todo:
-// LEGEND
-// STYLE GEOCODE, ETC.
-// KEEP POLISHING STUDIO STYLES
-// POLISH
-//  - Center on map click? If popup isn't in viewport, zoom down.
-//  - 
