@@ -17,7 +17,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltd
 /********** INITIALIZE MAP **********/
 
 // Set adaptive sizing
-var mapHeight = window.innerWidth * adaptive_ratio;
+let mapHeight = window.innerWidth * adaptive_ratio;
 document.getElementById("map").style.height = mapHeight.toString() + "px";
 
 // Init map
@@ -30,7 +30,7 @@ const map = new mapboxgl.Map({
   scrollZoom: false
 });
 
-// Setup of basic features
+// Setup basic map features
 if (utils.isMobile()) {
   map.dragRotate.disable();
   map.touchZoomRotate.disableRotation();
@@ -43,7 +43,7 @@ if (utils.isMobile()) {
 /********** INITIALIZE GEOCODER **********/
 
 // Make and attach geocoder
-var geocoder = new MapboxGeocoder({
+let geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
     bbox: [-97.25, 43.4, -89.53, 49.5],
     zoom: 12,
@@ -53,11 +53,10 @@ document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
 /********** MAP BEHAVIORS **********/
 
-// Onload behaviors
 map.on('load', function() {
   // Init popups and popovers
-  var popup = new StribPopup(map);
-  var popover = new Popover('#map-popover');
+  let popup = new StribPopup(map);
+  let popover = new Popover('#map-popover');
 
   // Only allow dragpan after you zoom in
   map.on('zoom', function() {
@@ -71,12 +70,14 @@ map.on('load', function() {
   // Capture mousemove events on desktop and touch/block on mobile or small viewports
   if ((window.innerWidth <= popover_thresh || document.body.clientWidth <= popover_thresh) || utils.isMobile()) {
     map.on('click', 'mnprecinctsgeo', function(e) {
+      let f = e.features[0];
+
       // Create and populate popover if mobile or small viewport
-      var precinct = e.features[0].properties.precinct;
-      var dfl_votes = e.features[0].properties.dfl_votes;
-      var gop_votes = e.features[0].properties.gop_votes;
-      var dfl_pct = e.features[0].properties.dfl_pct;
-      var gop_pct = e.features[0].properties.gop_pct;
+      let precinct = f.properties.precinct;
+      let dfl_votes = f.properties.dfl_votes;
+      let gop_votes = f.properties.gop_votes;
+      let dfl_pct = f.properties.dfl_pct;
+      let gop_pct = f.properties.gop_pct;
 
       popover.open(precinct, dfl_votes, gop_votes, dfl_pct, gop_pct);
 
