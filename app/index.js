@@ -82,11 +82,14 @@ const map = new mapboxgl.Map({
 });
 
 // Basic options and setup
-map.addControl(new mapboxgl.NavigationControl());
-map.dragRotate.disable();
-map.touchZoomRotate.disableRotation();
-map.dragPan.disable();
-map.getCanvas().style.cursor = 'pointer';
+if (isMobile.any()) {
+  map.dragRotate.disable();
+  map.touchZoomRotate.disableRotation();
+} else {
+  map.addControl(new mapboxgl.NavigationControl());
+  map.dragPan.disable();
+  map.getCanvas().style.cursor = 'pointer';
+}
 
 // Make and attach geocoder
 var geocoder = new MapboxGeocoder({
@@ -101,22 +104,44 @@ document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 map.on('load', function() {
   var popup = new mapboxgl.Popup({
     closeButton: false,
-    closeOnClick: false
+    closeOnClick: false,
+    offset: 30
   });
 
   var popover = new Popover('#map-popover');
 
   // Handlers
   map.on('zoom', function() {
-    if (map.getZoom() < 7) {
+    if (map.getZoom() < 5 ) {
       map.dragPan.disable();
     } else {
       map.dragPan.enable();
     }
   });
 
-  // Capture mousemove events on desktop and touch on mobile
-  if (!isMobile.any()) {
+  // Capture mousemove events on desktop and touch on mobile or small viewports
+  if ((window.innerWidth <= 500 || document.body.clientWidth <= 500) || isMobile.any()) {
+    map.on('click', 'mnprecinctsgeo', function(e) {
+      // Popup components
+      var precinct = e.features[0].properties.precinct;
+      var dfl_votes = e.features[0].properties.dfl_votes;
+      var gop_votes = e.features[0].properties.gop_votes;
+      var dfl_pct = e.features[0].properties.dfl_pct;
+      var gop_pct = e.features[0].properties.gop_pct;
+
+      // Populate the popup and set its coordinates
+      // based on the feature found.
+      popover.open(precinct, dfl_votes, gop_votes, dfl_pct, gop_pct);
+
+      // Scroll into view if popover is off the screen
+      if (!popover.is_in_viewport()) {
+        console.log('scrollio')
+        $('html, body').animate({
+          'scrollTop' : $("#map").offset().top
+        });
+      }
+    });
+  } else {
     map.on('mousemove', 'mnprecinctsgeo', function(e) {
       var f = map.queryRenderedFeatures(e.point)[0];
       placeTooltip(e, popup);
@@ -125,25 +150,13 @@ map.on('load', function() {
     map.on('mouseleave', 'mnprecinctsgeo', function() {
       popup.remove();
     });
-  } else {
-    map.on('click', 'mnprecinctsgeo', function(e) {
-      // Popup components
-      var precinct = e.features[0].properties.precinct;
-      var dfl = e.features[0].properties.dfl_votes;
-      var gop = e.features[0].properties.gop_votes;
-
-      // Populate the popup and set its coordinates
-      // based on the feature found.
-      popover.open(precinct, dfl, gop);
-    });
   }
-
 });
 
 // Todo:
-// MOBILE BEHAVIOR
-//  - Popup styles at bottom
 // LEGEND
 // STYLE GEOCODE, ETC.
-// MULTIPLE LAYERS FOR DIFF RACES?
 // KEEP POLISHING STUDIO STYLES
+// POLISH
+//  - Center on map click? If popup isn't in viewport, zoom down.
+//  - 

@@ -19,7 +19,7 @@ echo "Getting 2014 DFL totals ..." &&
 cat mn-gov-precinct-2014.tmp.csv | \
   csv2json -r ";" | \
   ndjson-split | \
-  ndjson-map '{"id":  d.county_id + d.precinct_id, "county_id": d.county_id, "precinct_id": d.precinct_id, "party": d.party, "votes": parseInt(d.votes)}' | \
+  ndjson-map '{"id":  d.county_id + d.precinct_id, "county_id": d.county_id, "precinct_id": d.precinct_id, "party": d.party, "votes": parseInt(d.votes), "votes_pct": parseFloat(d.votes_pct)}' | \
   ndjson-filter 'd.party == "DFL"' | \
   uniq > 'dfl14.tmp.ndjson' &&
 
@@ -27,19 +27,19 @@ echo "Getting 2014 Republican totals ..." &&
 cat mn-gov-precinct-2014.tmp.csv | \
   csv2json -r ";" | \
   ndjson-split | \
-  ndjson-map '{"id":  d.county_id + d.precinct_id, "county_id": d.county_id, "precinct_id": d.precinct_id, "party": d.party, "votes": parseInt(d.votes)}' | \
+  ndjson-map '{"id":  d.county_id + d.precinct_id, "county_id": d.county_id, "precinct_id": d.precinct_id, "party": d.party, "votes": parseInt(d.votes), "votes_pct": parseFloat(d.votes_pct)}' | \
   ndjson-filter 'd.party == "R"' | \
   uniq > 'r14.tmp.ndjson' &&
 
 echo "Joining and calculating results ..." &&
 ndjson-join 'd.id' <(cat dfl14.tmp.ndjson) <(cat r14.tmp.ndjson) | \
-  ndjson-map '{"id":  d[0].county_id + d[0].precinct_id, "winner2014": d[0].votes > d[1].votes ? "clinton" : d[0].votes == d[1].votes ? "even" : "trump", "dfl_votes": parseInt(d[0].votes), "gop_votes": parseInt(d[1].votes), "total_votes": parseInt(d[1].votes) + parseInt(d[0].votes)}' > joined14.tmp.ndjson &&
+  ndjson-map '{"id":  d[0].county_id + d[0].precinct_id, "winner2014": d[0].votes > d[1].votes ? "dfl" : d[0].votes == d[1].votes ? "even" : "r", "dfl_votes": parseInt(d[0].votes), "gop_votes": parseInt(d[1].votes), "total_votes": parseInt(d[1].votes) + parseInt(d[0].votes), "dfl_pct": parseFloat(d[0].votes_pct), "gop_pct": parseFloat(d[1].votes_pct)}' > joined14.tmp.ndjson &&
 
 echo "Joining results to precinct map ..." &&
 ndjson-split 'd.objects.precincts.geometries' < mn-precincts-longlat.tmp.json |
   ndjson-map -r d3 '{"type": d.type, "arcs": d.arcs, "properties": {"id": d3.format("02")(d.properties.COUNTYCODE) + d.properties.PCTCODE, "county": d.properties.COUNTYNAME, "precinct": d.properties.PCTNAME, "area_sqmi": d.properties.Shape_Area * 0.00000038610}}' > mn-precincts-longlat.tmp.ndjson &&
   ndjson-join --left 'd.properties.id' 'd.id' <(cat mn-precincts-longlat.tmp.ndjson) <(cat joined14.tmp.ndjson) |
-   ndjson-map '{"type": d[0].type, "arcs": d[0].arcs, "properties": {"id": d[0].properties.id, "county": d[0].properties.county, "precinct": d[0].properties.precinct, "area_sqmi": d[0].properties.area_sqmi, "winner2014": d[1] != null ? d[1].winner2014 : null, "dfl_votes": d[1] != null ? d[1].dfl_votes : null, "gop_votes": d[1] != null ? d[1].gop_votes : null, "total_votes": d[1] != null ? d[1].total_votes : null, "votes_sqmi": d[1] != null ? d[1].total_votes / d[0].properties.area_sqmi : null}}' |
+   ndjson-map '{"type": d[0].type, "arcs": d[0].arcs, "properties": {"id": d[0].properties.id, "county": d[0].properties.county, "precinct": d[0].properties.precinct, "area_sqmi": d[0].properties.area_sqmi, "winner2014": d[1] != null ? d[1].winner2014 : null, "dfl_votes": d[1] != null ? d[1].dfl_votes : null, "gop_votes": d[1] != null ? d[1].gop_votes : null, "total_votes": d[1] != null ? d[1].total_votes : null, "votes_sqmi": d[1] != null ? d[1].total_votes / d[0].properties.area_sqmi : null, "dfl_pct": d[1] != null ? d[1].dfl_pct : null, "gop_pct": d[1] != null ? d[1].gop_pct : null}}' |
    ndjson-reduce 'p.geometries.push(d), p' '{"type": "GeometryCollection", "geometries":[]}' > mn-precincts.geometries.tmp.ndjson &&
 
 echo "Putting it all together ..." &&
