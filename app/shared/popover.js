@@ -12,7 +12,7 @@ class Popover {
     <table> \
       <thead> \
         <tr> \
-          <th>Party</th> \
+          <th>Candidate</th> \
           <th class="right">Votes</th> \
           <th class="right">Pct.</th> \
         </tr> \

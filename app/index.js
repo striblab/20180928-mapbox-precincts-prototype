@@ -49,6 +49,7 @@ let geocoder = new MapboxGeocoder({
     zoom: 12,
     placeholder: "Search for an address"
 });
+
 document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
 /********** MAP BEHAVIORS **********/
@@ -58,14 +59,41 @@ map.on('load', function() {
   let popup = new StribPopup(map);
   let popover = new Popover('#map-popover');
 
+  geocoder.on('result', function(ev) {
+    // var center = map.getCenter();
+    // console.log(center);
+    // console.log(map.queryRenderedFeatures(center, {layers:['mnprecinctsgeo']}));
+    // console.log(ev);
+    // console.log(ev.result.center);
+    // var f = map.queryRenderedFeatures(ev.result.center, {layers:['mnprecinctsgeo']});
+    // console.log(f);
+    // console.log(ev.result.center);
+  });
+
+  map.addLayer({
+    "id": "precincts-highlighted",
+    "type": "line",
+    "source": "composite",
+    "source-layer": "mnprecinctsgeo",
+    "paint": {
+      "line-color": ["case", [
+          "boolean", ["feature-state", "hover"], false],
+          "black",
+          "transparent"
+      ]
+    }
+  }, 'place-city-sm'); // Place polygon under these labels.
+
   // Only allow dragpan after you zoom in
-  map.on('zoom', function() {
+  map.on('zoomend', function(e) {
     if (map.getZoom() < 5 ) {
       map.dragPan.disable();
     } else {
       map.dragPan.enable();
     }
   });
+
+  var hoveredStateId = null;
 
   // Capture mousemove events on desktop and touch/block on mobile or small viewports
   if ((window.innerWidth <= popover_thresh || document.body.clientWidth <= popover_thresh) || utils.isMobile()) {
@@ -88,10 +116,23 @@ map.on('load', function() {
           'scrollTop' : $("#map").offset().top
         });
       }
+
+      // Highlight precinct on touch
+      map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
     });
   // Handle mouseover events in desktop and non-mobile viewports
   } else {
     map.on('mousemove', 'mnprecinctsgeo', function(e) {
+      let f = e.features[0];
+      // https://github.com/mapbox/mapbox-gl-js/issues/2225
+      // map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
+      if (e.features.length > 0) {
+          if (hoveredStateId) {
+              map.setFeatureState({source: 'precincts-highlighted', layer: 'precincts-highlighted', id: hoveredStateId}, { hover: false});
+          }
+          hoveredStateId = e.features[0].id;
+          map.setFeatureState({source: 'precincts-highlighted', layer: 'precincts-highlighted', id: hoveredStateId}, { hover: true});
+      }
       popup.open(e);
     });
 

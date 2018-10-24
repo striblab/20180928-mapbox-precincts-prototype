@@ -15,7 +15,7 @@ class StribPopup {
       <table> \
         <thead> \
           <tr> \
-            <th>Party</th> \
+            <th>Candidate</th> \
             <th class="right">Votes</th> \
           </tr> \
         </thead> \
