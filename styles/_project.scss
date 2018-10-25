@@ -62,6 +62,19 @@ section.leadin {
   position:relative;
 }
 
+.credits {
+  clear: both;
+  border-top:1px solid #dfdfdf;
+  margin-top: 2em;
+  padding-top: 1em;
+
+  p {
+    font-family: "Benton Sans";
+    font-size: 0.8em;
+    color: #808080;
+  }
+}
+
 /********** TOOLTIPS **********/
 
 .mapboxgl-popup {

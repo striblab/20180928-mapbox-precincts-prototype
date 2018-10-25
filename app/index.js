@@ -11,6 +11,7 @@ import utilsFn from './utils.js';
 const adaptive_ratio = 1.07; // Height/width ratio for adaptive map sizing
 const popover_thresh = 500; // The width of the map when tooltips turn to popvers
 const utils = utilsFn({});
+const isMobile = (window.innerWidth <= popover_thresh || document.body.clientWidth) <= popover_thresh || utils.isMobile();
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltdnpvOWgifQ.aPWEg8C-5IJ0_7cXusY-1g';
 
@@ -50,6 +51,17 @@ let geocoder = new MapboxGeocoder({
     placeholder: "Search for an address"
 });
 
+geocoder.on('result', function(ev) {
+  // var center = map.getCenter();
+  // console.log(center);
+  // console.log(map.queryRenderedFeatures(center, {layers:['mnprecinctsgeo']}));
+  // console.log(ev);
+  // console.log(ev.result.center);
+  // var f = map.queryRenderedFeatures(ev.result.center, {layers:['mnprecinctsgeo']});
+  // console.log(f);
+  // console.log(ev.result.center);
+});
+
 document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
 /********** MAP BEHAVIORS **********/
@@ -59,29 +71,15 @@ map.on('load', function() {
   let popup = new StribPopup(map);
   let popover = new Popover('#map-popover');
 
-  geocoder.on('result', function(ev) {
-    // var center = map.getCenter();
-    // console.log(center);
-    // console.log(map.queryRenderedFeatures(center, {layers:['mnprecinctsgeo']}));
-    // console.log(ev);
-    // console.log(ev.result.center);
-    // var f = map.queryRenderedFeatures(ev.result.center, {layers:['mnprecinctsgeo']});
-    // console.log(f);
-    // console.log(ev.result.center);
-  });
-
   map.addLayer({
     "id": "precincts-highlighted",
     "type": "line",
     "source": "composite",
     "source-layer": "mnprecinctsgeo",
     "paint": {
-      "line-color": ["case", [
-          "boolean", ["feature-state", "hover"], false],
-          "black",
-          "transparent"
-      ]
-    }
+      "line-color": "#000000"
+    },
+      "filter": ['in', 'id', '']
   }, 'place-city-sm'); // Place polygon under these labels.
 
   // Only allow dragpan after you zoom in
@@ -93,10 +91,8 @@ map.on('load', function() {
     }
   });
 
-  var hoveredStateId = null;
-
   // Capture mousemove events on desktop and touch/block on mobile or small viewports
-  if ((window.innerWidth <= popover_thresh || document.body.clientWidth <= popover_thresh) || utils.isMobile()) {
+  if (isMobile) {
     map.on('click', 'mnprecinctsgeo', function(e) {
       let f = e.features[0];
 
@@ -119,20 +115,11 @@ map.on('load', function() {
 
       // Highlight precinct on touch
       map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
+      map.flyTo({center: e.lngLat, zoom: 9});
     });
   // Handle mouseover events in desktop and non-mobile viewports
   } else {
     map.on('mousemove', 'mnprecinctsgeo', function(e) {
-      let f = e.features[0];
-      // https://github.com/mapbox/mapbox-gl-js/issues/2225
-      // map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
-      if (e.features.length > 0) {
-          if (hoveredStateId) {
-              map.setFeatureState({source: 'precincts-highlighted', layer: 'precincts-highlighted', id: hoveredStateId}, { hover: false});
-          }
-          hoveredStateId = e.features[0].id;
-          map.setFeatureState({source: 'precincts-highlighted', layer: 'precincts-highlighted', id: hoveredStateId}, { hover: true});
-      }
       popup.open(e);
     });
 
