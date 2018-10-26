@@ -1,3 +1,5 @@
+mkdir -p mapbox &&
+
 echo "Downloading 2018 precincts ..." &&
 wget ftp://ftp.gisdata.mn.gov/pub/gdrs/data/pub/us_mn_state_sos/bdry_votingdistricts/shp_bdry_votingdistricts.zip && \
   unzip shp_bdry_votingdistricts.zip  && \

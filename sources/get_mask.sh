@@ -1,3 +1,5 @@
+mkdir -p mapbox &&
+
 wget https://www2.census.gov/geo/tiger/GENZ2017/shp/cb_2017_us_county_500k.zip && \
   unzip cb_2017_us_county_500k.zip && \
   shp2json cb_2017_us_county_500k.shp | \
