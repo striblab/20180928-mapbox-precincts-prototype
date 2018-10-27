@@ -3,6 +3,7 @@ build/*
 config.custom.json
 .awspublish*
 .cache*
+sources/mapbox/*
 
 # Data parts
 data/sources/*

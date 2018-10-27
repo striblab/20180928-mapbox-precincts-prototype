@@ -73,7 +73,7 @@ mapshaper mn-precincts-geo.json \
   -o mn-precincts-2014.svg
 
 echo "Creating MBtiles for Mapbox upload ..." &&
-tippecanoe -o ./mapbox/mn_election_results_2014.mbtiles -Z 2 -z 13 --generate-ids ./mn-precincts-geo.json &&
+tippecanoe -o ./mapbox/mn_election_results_2014.mbtiles -Z 2 -z 14 --generate-ids ./mn-precincts-geo.json &&
 
 echo "Cleaning up ..."
 rm *.tmp.csv

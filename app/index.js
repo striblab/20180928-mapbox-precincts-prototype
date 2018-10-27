@@ -12,6 +12,7 @@ const adaptive_ratio = 1.07; // Height/width ratio for adaptive map sizing
 const popover_thresh = 500; // The width of the map when tooltips turn to popvers
 const utils = utilsFn({});
 const isMobile = (window.innerWidth <= popover_thresh || document.body.clientWidth) <= popover_thresh || utils.isMobile();
+let center = null;
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltdnpvOWgifQ.aPWEg8C-5IJ0_7cXusY-1g';
 
@@ -52,14 +53,15 @@ let geocoder = new MapboxGeocoder({
 });
 
 geocoder.on('result', function(ev) {
-  // var center = map.getCenter();
-  // console.log(center);
-  // console.log(map.queryRenderedFeatures(center, {layers:['mnprecinctsgeo']}));
-  // console.log(ev);
-  // console.log(ev.result.center);
-  // var f = map.queryRenderedFeatures(ev.result.center, {layers:['mnprecinctsgeo']});
-  // console.log(f);
-  // console.log(ev.result.center);
+  let r = ev.result.geometry;
+  console.log(r);
+  map.on('zoomend', function(e) {
+    let pixels = map.project(r.coordinates);
+    let f = map.queryRenderedFeatures(pixels, {layers: ["mnprecinctsgeo"]})[0];
+
+    console.log(f);
+    map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
+  });
 });
 
 document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
@@ -115,7 +117,10 @@ map.on('load', function() {
 
       // Highlight precinct on touch
       map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
-      map.flyTo({center: e.lngLat, zoom: 9});
+
+      // Zoom and enhance! But only if you're not already zoomed in past 9
+      let zoom = map.getZoom() < 9 ? 9 : map.getZoom();
+      map.flyTo({center: e.lngLat, zoom: zoom});
     });
   // Handle mouseover events in desktop and non-mobile viewports
   } else {
