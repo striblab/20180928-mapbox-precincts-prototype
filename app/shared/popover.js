@@ -59,10 +59,10 @@ class Popover {
 
     // Create and populate popover if mobile or small viewport
     let precinct = f.properties.precinct;
-    let dfl_votes = f.properties.dfl_votes;
-    let gop_votes = f.properties.gop_votes;
-    let dfl_pct = f.properties.dfl_pct;
-    let gop_pct = f.properties.gop_pct;
+    let dfl_votes = f.properties.dfl_votes ? f.properties.dfl_votes : '-';
+    let gop_votes = f.properties.gop_votes ? f.properties.gop_votes : '-';
+    let dfl_pct = f.properties.dfl_pct ? f.properties.dfl_pct : '-';
+    let gop_pct = f.properties.gop_pct ? f.properties.gop_pct : '-';
 
     let el = document.querySelector(this.el);
     el.innerHTML = this._layout(precinct, dfl_votes, gop_votes, dfl_pct, gop_pct);

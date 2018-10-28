@@ -38,8 +38,8 @@ class StribPopup {
 
     // Popup components
     var precinct = e.features[0].properties.precinct;
-    var dfl_votes = e.features[0].properties.dfl_votes;
-    var gop_votes = e.features[0].properties.gop_votes;
+    let dfl_votes = e.features[0].properties.dfl_votes ? e.features[0].properties.dfl_votes : '-';
+    let gop_votes = e.features[0].properties.gop_votes ? e.features[0].properties.gop_votes : '-';
 
     // Populate the popup and set its coordinates
     // based on the feature found.
