@@ -23,7 +23,8 @@ $selector-wrapper: '.strib-styles.ssa.ssb.ssc';
 // Project specific styles.  Split styles into files per component
 #{$selector-wrapper} {
   // Split your styles into multiple files so its easier to understand and change
-  @import 'mapboxgl';
   @import 'project';
+  @import 'mapboxgl';
+  @import 'mapbox-gl-geocoder';
 }
 

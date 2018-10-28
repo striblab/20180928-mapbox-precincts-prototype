@@ -12,6 +12,9 @@ const adaptive_ratio = 1.07; // Height/width ratio for adaptive map sizing
 const popover_thresh = 500; // The width of the map when tooltips turn to popvers
 const utils = utilsFn({});
 const isMobile = (window.innerWidth <= popover_thresh || document.body.clientWidth) <= popover_thresh || utils.isMobile();
+
+// Probably a better way than declaring this up here, but ...
+let popover = new Popover('#map-popover');
 let center = null;
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltdnpvOWgifQ.aPWEg8C-5IJ0_7cXusY-1g';
@@ -37,7 +40,6 @@ if (utils.isMobile()) {
   map.dragRotate.disable();
   map.touchZoomRotate.disableRotation();
 } else {
-  map.addControl(new mapboxgl.NavigationControl());
   map.dragPan.disable();
   map.getCanvas().style.cursor = 'pointer';
 }
@@ -48,30 +50,56 @@ if (utils.isMobile()) {
 let geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
     bbox: [-97.25, 43.4, -89.53, 49.5],
-    zoom: 12,
+    zoom: 9,
     placeholder: "Search for an address"
 });
 
+// For completely mystifying reasons, the geocoder event fires twice. This prevents
+// that from happening by tracking the last geocode.
+let last_geocode = null;
 geocoder.on('result', function(ev) {
   let r = ev.result.geometry;
-  console.log(r);
-  map.on('zoomend', function(e) {
-    let pixels = map.project(r.coordinates);
-    let f = map.queryRenderedFeatures(pixels, {layers: ["mnprecinctsgeo"]})[0];
 
-    console.log(f);
-    map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
-  });
+  // Todo: Raise some kind of error if current geocode == last one?
+  if (r.coordinates.toString() !== last_geocode) {
+    // Close popover if open on mobile
+    if (isMobile) {
+      popover.close();
+    }
+
+    map.once('moveend', function(e) {
+      // Highlight precinct once tiles are loaded
+      let checker = setInterval(function(){ 
+        if (map.areTilesLoaded()) {
+
+          // Gotta project to pixels first, then get the feature
+          let pixels = map.project(r.coordinates);
+
+          // Get features from the main layer, then highlight using highlight layer
+          let f = map.queryRenderedFeatures(pixels, {layers: ["mnprecinctsgeo"]})[0];
+          map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
+
+          // Open popover on mobile
+          if (isMobile) {
+            popover.open(f);
+          }
+
+          clearInterval(checker);
+        }
+      }, 100);
+    });
+
+    last_geocode = r.coordinates.toString();
+  }
 });
 
-document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+map.addControl(geocoder, 'top-right');
 
 /********** MAP BEHAVIORS **********/
 
 map.on('load', function() {
-  // Init popups and popovers
+  // Prep popup
   let popup = new StribPopup(map);
-  let popover = new Popover('#map-popover');
 
   map.addLayer({
     "id": "precincts-highlighted",
@@ -93,19 +121,12 @@ map.on('load', function() {
     }
   });
 
-  // Capture mousemove events on desktop and touch/block on mobile or small viewports
+  // Capture mousemove events on desktop and touch on mobile or small viewports
   if (isMobile) {
     map.on('click', 'mnprecinctsgeo', function(e) {
       let f = e.features[0];
 
-      // Create and populate popover if mobile or small viewport
-      let precinct = f.properties.precinct;
-      let dfl_votes = f.properties.dfl_votes;
-      let gop_votes = f.properties.gop_votes;
-      let dfl_pct = f.properties.dfl_pct;
-      let gop_pct = f.properties.gop_pct;
-
-      popover.open(precinct, dfl_votes, gop_votes, dfl_pct, gop_pct);
+      popover.open(f);
 
       // Scroll into view if popover is off the screen. jQuery assumed to
       // be on page because of Strib environment.
