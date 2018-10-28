@@ -44,6 +44,10 @@ section.leadin {
   margin-bottom:40px;
 }
 
+#map-section {
+  margin-top:50px;
+}
+
 #map {
   max-height:1100px;
 }
@@ -114,7 +118,7 @@ section.leadin {
 }
 
 .mapboxgl-popup th {
-  font-size: 0.9em;
+  font-size: 0.7em;
   text-transform:uppercase;
   font-weight:normal;
 }

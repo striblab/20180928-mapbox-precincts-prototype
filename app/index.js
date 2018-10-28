@@ -19,7 +19,7 @@ let center = null;
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2pkZDNiIiwiYSI6ImNqZWJtZWVsYjBoYTAycm1raTltdnpvOWgifQ.aPWEg8C-5IJ0_7cXusY-1g';
 
-/********** INITIALIZE MAP **********/
+/********** INITIALIZE MAP AND GEOCODER **********/
 
 // Set adaptive sizing
 let mapHeight = window.innerWidth * adaptive_ratio;
@@ -35,65 +35,25 @@ const map = new mapboxgl.Map({
   scrollZoom: false
 });
 
-// Setup basic map features
+// Init geocoder
+let geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    bbox: [-97.25, 43.4, -89.53, 49.5],
+    zoom: 9,
+    flyTo: false, // Disable in front of manual version below
+    placeholder: "Search for an address"
+});
+
+// Setup basic map controls
+map.addControl(geocoder, 'top-right');
 if (utils.isMobile()) {
   map.dragRotate.disable();
   map.touchZoomRotate.disableRotation();
 } else {
   map.dragPan.disable();
   map.getCanvas().style.cursor = 'pointer';
+  map.addControl(new mapboxgl.NavigationControl());
 }
-
-/********** INITIALIZE GEOCODER **********/
-
-// Make and attach geocoder
-let geocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
-    bbox: [-97.25, 43.4, -89.53, 49.5],
-    zoom: 9,
-    placeholder: "Search for an address"
-});
-
-// For completely mystifying reasons, the geocoder event fires twice. This prevents
-// that from happening by tracking the last geocode.
-let last_geocode = null;
-geocoder.on('result', function(ev) {
-  let r = ev.result.geometry;
-
-  // Todo: Raise some kind of error if current geocode == last one?
-  if (r.coordinates.toString() !== last_geocode) {
-    // Close popover if open on mobile
-    if (isMobile) {
-      popover.close();
-    }
-
-    map.once('moveend', function(e) {
-      // Highlight precinct once tiles are loaded
-      let checker = setInterval(function(){ 
-        if (map.areTilesLoaded()) {
-
-          // Gotta project to pixels first, then get the feature
-          let pixels = map.project(r.coordinates);
-
-          // Get features from the main layer, then highlight using highlight layer
-          let f = map.queryRenderedFeatures(pixels, {layers: ["mnprecinctsgeo"]})[0];
-          map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
-
-          // Open popover on mobile
-          if (isMobile) {
-            popover.open(f);
-          }
-
-          clearInterval(checker);
-        }
-      }, 100);
-    });
-
-    last_geocode = r.coordinates.toString();
-  }
-});
-
-map.addControl(geocoder, 'top-right');
 
 /********** MAP BEHAVIORS **********/
 
@@ -152,5 +112,53 @@ map.on('load', function() {
     map.on('mouseleave', 'mnprecinctsgeo', function() {
       popup.close();
     });
+  }
+});
+
+/********** GEOCODER BEHAVIORS **********/
+
+// For completely mystifying reasons, the geocoder event fires twice. This prevents
+// that from happening by tracking the last geocode.
+let last_geocode = null;
+geocoder.on('result', function(ev) {
+  let r = ev.result.geometry;
+
+  // Todo: Raise some kind of error if current geocode == last one?
+  if (r.coordinates.toString() !== last_geocode) {
+
+    // Manual flyTo for centering and zoom purposes
+    map.flyTo({
+      center: r.coordinates,
+      zoom: 11
+    });
+
+    // Close popover if open on mobile
+    if (isMobile) {
+      popover.close();
+    }
+
+    map.once('moveend', function(e) {
+      // Highlight precinct once tiles are loaded
+      let checker = setInterval(function(){ 
+        if (map.areTilesLoaded()) {
+
+          // Gotta project to pixels first, then get the feature
+          let pixels = map.project(r.coordinates);
+
+          // Get features from the main layer, then highlight using highlight layer
+          let f = map.queryRenderedFeatures(pixels, {layers: ["mnprecinctsgeo"]})[0];
+          map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
+
+          // Open popover on mobile
+          if (isMobile) {
+            popover.open(f);
+          }
+
+          clearInterval(checker);
+        }
+      }, 100);
+    });
+
+    last_geocode = r.coordinates.toString();
   }
 });
