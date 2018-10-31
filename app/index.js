@@ -9,7 +9,7 @@ import utilsFn from './utils.js';
 /********** CONSTANTS **********/
 
 const adaptive_ratio = 1.07; // Height/width ratio for adaptive map sizing
-const popover_thresh = 500; // The width of the map when tooltips turn to popvers
+const popover_thresh = 500; // The width of the map when tooltips turn to popovers
 const utils = utilsFn({});
 const isMobile = (window.innerWidth <= popover_thresh || document.body.clientWidth) <= popover_thresh || utils.isMobile();
 
@@ -31,6 +31,7 @@ const map = new mapboxgl.Map({
   style: 'mapbox://styles/cjdd3b/cjmt2qdtt1bvv2stn3fp6bt33',
   center: [-94.6859, 47.7296],
   zoom: 2,
+  maxZoom: 13,
   maxBounds: [-97.25, 43.4, -89.53, 49.5],
   scrollZoom: false
 });
@@ -45,6 +46,7 @@ let geocoder = new MapboxGeocoder({
 });
 
 // Setup basic map controls
+map.keyboard.disable();
 map.addControl(geocoder, 'top-right');
 if (utils.isMobile()) {
   map.dragRotate.disable();
@@ -52,7 +54,7 @@ if (utils.isMobile()) {
 } else {
   map.dragPan.disable();
   map.getCanvas().style.cursor = 'pointer';
-  map.addControl(new mapboxgl.NavigationControl());
+  map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 }
 
 /********** MAP BEHAVIORS **********/
