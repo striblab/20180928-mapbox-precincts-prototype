@@ -47,15 +47,16 @@ cat mn-gov-precinct-2014.tmp.csv | \
 
 echo "Joining and calculating results ..." &&
 ndjson-join 'd.id' <(cat dfl.tmp.ndjson) <(cat r.tmp.ndjson) | \
-  ndjson-map '{"id":  d[0].county_id + d[0].precinct_id, "winner": d[0].votes > d[1].votes ? "dfl" : d[0].votes == d[1].votes ? "even" : "r", "dfl_votes": parseInt(d[0].votes), "gop_votes": parseInt(d[1].votes), "total_votes": parseInt(d[1].votes) + parseInt(d[0].votes), "dfl_pct": parseFloat(d[0].votes_pct), "gop_pct": parseFloat(d[1].votes_pct)}' | \
+  ndjson-map '{"id":  d[0].county_id + d[0].precinct_id, "winner": d[0].votes > d[1].votes ? "dfl" : d[0].votes == d[1].votes ? "even" : "r", "winner_margin": d[0].votes > d[1].votes ? d[0].votes_pct - d[1].votes_pct : d[0].votes < d[1].votes ? d[1].votes_pct - d[0].votes_pct : "even", "dfl_votes": parseInt(d[0].votes), "gop_votes": parseInt(d[1].votes), "total_votes": parseInt(d[1].votes) + parseInt(d[0].votes), "dfl_pct": parseFloat(d[0].votes_pct), "gop_pct": parseFloat(d[1].votes_pct)}' | \
 ndjson-join 'd.id' - <(cat oth.tmp.ndjson) | \
-ndjson-map '{"id":  d[0].id, "winner": d[1].majority_oth ? "oth" : d[0].winner, "dfl_votes": d[0].dfl_votes, "gop_votes": d[0].gop_votes, "oth_votes": d[1].votes, "total_votes": d[0].total_votes, "dfl_pct": d[0].dfl_pct, "gop_pct": d[0].gop_pct, "oth_pct": d[1].votes_pct}' > joined.tmp.ndjson &&
+ndjson-map '{"id": d[0].id, "winner": d[1].majority_oth ? "oth" : d[0].winner, "winner_margin": d[0].winner_margin, "dfl_votes": d[0].dfl_votes, "gop_votes": d[0].gop_votes, "oth_votes": d[1].votes, "total_votes": d[0].total_votes, "dfl_pct": d[0].dfl_pct, "gop_pct": d[0].gop_pct, "oth_pct": d[1].votes_pct}' |
+ndjson-map '{"id": d.id, "winner": d.winner, "winner_margin": d.winner_margin, "dfl_votes": d.dfl_votes, "gop_votes": d.gop_votes, "oth_votes": d.oth_votes, "total_votes": d.total_votes, "dfl_pct": d.dfl_pct, "gop_pct": d.gop_pct, "oth_pct": d.oth_pct, "winner_cat": d.winner != "even" ? d.winner_margin <= 5 ? d.winner + "-small" : d.winner_margin <= 10 && d.winner_margin > 5 ? d.winner + "-med" : d.winner_margin > 10 ? d.winner + "-large" : null : d.winner == "oth" ? "oth" : "even"}' > joined.tmp.ndjson &&
 
 echo "Joining results to precinct map ..." &&
 ndjson-split 'd.objects.precincts.geometries' < mn-precincts-longlat.tmp.json |
   ndjson-map -r d3 '{"type": d.type, "arcs": d.arcs, "properties": {"id": d3.format("02")(d.properties.COUNTYCODE) + d.properties.PCTCODE, "county": d.properties.COUNTYNAME, "precinct": d.properties.PCTNAME, "area_sqmi": d.properties.Shape_Area * 0.00000038610}}' > mn-precincts-longlat.tmp.ndjson &&
   ndjson-join --left 'd.properties.id' 'd.id' <(cat mn-precincts-longlat.tmp.ndjson) <(cat joined.tmp.ndjson) |
-   ndjson-map '{"type": d[0].type, "arcs": d[0].arcs, "properties": {"id": d[0].properties.id, "county": d[0].properties.county, "precinct": d[0].properties.precinct, "area_sqmi": d[0].properties.area_sqmi, "winner": d[1] != null ? d[1].winner : null, "dfl_votes": d[1] != null ? d[1].dfl_votes : null, "gop_votes": d[1] != null ? d[1].gop_votes : null, "oth_votes": d[1] != null ? d[1].oth_votes : null, "total_votes": d[1] != null ? d[1].total_votes : null, "votes_sqmi": d[1] != null ? d[1].total_votes / d[0].properties.area_sqmi : null, "dfl_pct": d[1] != null ? d[1].dfl_pct : null, "gop_pct": d[1] != null ? d[1].gop_pct : null}}' |
+   ndjson-map '{"type": d[0].type, "arcs": d[0].arcs, "properties": {"id": d[0].properties.id, "county": d[0].properties.county, "precinct": d[0].properties.precinct, "area_sqmi": d[0].properties.area_sqmi, "winner": d[1] != null ? d[1].winner : null, "winner_margin": d[1] != null ? d[1].winner_margin : null, "winner_cat": d[1] != null ? d[1].winner_cat : null, "dfl_votes": d[1] != null ? d[1].dfl_votes : null, "gop_votes": d[1] != null ? d[1].gop_votes : null, "oth_votes": d[1] != null ? d[1].oth_votes : null, "total_votes": d[1] != null ? d[1].total_votes : null, "votes_sqmi": d[1] != null ? d[1].total_votes / d[0].properties.area_sqmi : null, "dfl_pct": d[1] != null ? d[1].dfl_pct : null, "gop_pct": d[1] != null ? d[1].gop_pct : null, "oth_pct": d[1] != null ? d[1].oth_pct : null }}' |
    ndjson-reduce 'p.geometries.push(d), p' '{"type": "GeometryCollection", "geometries":[]}' > mn-precincts.geometries.tmp.ndjson &&
 
 echo "Putting it all together ..." &&
@@ -67,9 +68,8 @@ echo "Creating SVG for print ..." &&
 mapshaper mn-precincts-geo.json \
   -quiet \
   -proj +proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs \
-  -colorizer name=calcFill colors='#c0272d,#0258a0,chartreuse,#874e8e,#dfdfdf' categories='r,dfl,oth,even,null' \
-  -colorizer name=calcOpacity colors='0.1,0.25,0.5,0.75,1,1' breaks=10,25,100,500,100000 \
-  -style fill='calcFill(winner)' opacity='calcOpacity(votes_sqmi)' \
+  -colorizer name=calcFill colors='#ffe6e6,#ff8080,#ff1a1a,#e6eeff,#80aaff,#1a66ff,chartreuse,#874e8e,#dfdfdf' categories='r-small,r-med,r-large,dfl-small,dfl-med,dfl-large,oth,even,null' \
+  -style fill='calcFill(winner_cat)' \
   -o mn-precincts-2014.svg
 
 echo "Creating MBtiles for Mapbox upload ..." &&
