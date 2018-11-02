@@ -4,7 +4,36 @@ class Popover {
     this.el = el;
   }
 
-  _layout(precinct, dfl_votes, gop_votes, dfl_pct, gop_pct) {
+  _get_candidate(party) {
+    if (party == 'DFL') {
+      return 'Walz';
+    } else if (party == 'R') {
+      return 'Johnson';
+    } else if (party == 'GLC') {
+      return 'Wright';
+    } else if (party == 'LIB') {
+      return 'Welter';
+    } else if (party == 'WI') {
+      return 'Write-in';
+    } else {
+      return 'Other';
+    }
+  }
+
+  _get_label(party) {
+    if (party == 'DFL') {
+      return 'label-d';
+    } else if (party == 'R') {
+      return 'label-r';
+    } else {
+      return 'label-oth';
+    }
+  }
+
+  _layout(precinct, votes_obj) {
+    let winner = votes_obj[0];
+    let second = votes_obj[1];
+
     return '<div id="popover-header"> \
       <h4 id="title">' + precinct + '</h4> \
       <span id="close">&#10006;</span> \
@@ -19,14 +48,14 @@ class Popover {
       </thead> \
       <tbody> \
         <tr> \
-          <td><span class="label-d"></span>Dayton</td> \
-          <td id="votes-d" class="right">' + dfl_votes + '</td> \
-          <td id="pct-d" class="right">' + Math.round(dfl_pct) + '%</td> \
+          <td><span class="' + this._get_label(winner.party) + '"></span>' + this._get_candidate(winner.party) + '</td> \
+          <td id="votes-r" class="right">' + winner.votes + '</td> \
+          <td id="pct-r" class="right">' + Math.round(winner.votes_pct) + '%</td> \
         </tr> \
         <tr> \
-          <td><span class="label-r"></span>Johnson</td> \
-          <td id="votes-r" class="right">' + gop_votes + '</td> \
-          <td id="pct-r" class="right">' + Math.round(gop_pct) + '%</td> \
+          <td><span class="' + this._get_label(second.party) + '"></span>' + this._get_candidate(second.party) + '</td> \
+          <td id="votes-r" class="right">' + second.votes + '</td> \
+          <td id="pct-r" class="right">' + Math.round(second.votes_pct) + '%</td> \
         </tr>\
       </tbody> \
     </table>';
@@ -59,13 +88,10 @@ class Popover {
 
     // Create and populate popover if mobile or small viewport
     let precinct = f.properties.precinct;
-    let dfl_votes = f.properties.dfl_votes ? f.properties.dfl_votes : '-';
-    let gop_votes = f.properties.gop_votes ? f.properties.gop_votes : '-';
-    let dfl_pct = f.properties.dfl_pct ? f.properties.dfl_pct : '-';
-    let gop_pct = f.properties.gop_pct ? f.properties.gop_pct : '-';
+    let votes_obj = eval(f.properties.votes_obj);
 
     let el = document.querySelector(this.el);
-    el.innerHTML = this._layout(precinct, dfl_votes, gop_votes, dfl_pct, gop_pct);
+    el.innerHTML = this._layout(precinct, votes_obj);
 
     let close_button = el.querySelector('#close');
     close_button.onclick = function() {

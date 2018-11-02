@@ -31,7 +31,7 @@ const map = new mapboxgl.Map({
   style: 'mapbox://styles/cjdd3b/cjmt2qdtt1bvv2stn3fp6bt33',
   center: [-94.6859, 47.7296],
   zoom: 2,
-  maxZoom: 13,
+  maxZoom: 12,
   maxBounds: [-97.25, 43.4, -89.53, 49.5],
   scrollZoom: false
 });
@@ -63,6 +63,7 @@ map.on('load', function() {
   // Prep popup
   let popup = new StribPopup(map);
 
+  // This is a layer purely for precinct highlights
   map.addLayer({
     "id": "precincts-highlighted",
     "type": "line",

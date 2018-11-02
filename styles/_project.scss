@@ -162,6 +162,16 @@ section.leadin {
   background-color:#C0272D;
 }
 
+.mapboxgl-popup .label-oth {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 2px;
+  margin-right: 5px;
+  background-color: #f7c272;
+}  
+
 /********** POPOVERS *********/
 
 #map-popover{
@@ -198,6 +208,16 @@ section.leadin {
     margin-left: 2px;
     margin-right: 5px;
     background-color:#C0272D;
+  }  
+
+  .label-oth {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 2px;
+    margin-right: 5px;
+    background-color: #f7c272;
   }  
 
   table {
@@ -240,4 +260,89 @@ section.leadin {
       margin-bottom:3px;
     }
   }
+}
+
+/********** LEGEND *********/
+
+#map-legend {
+  background-color:rgba(255, 255, 255, 0.7);;
+  position:absolute;
+  top:59px;
+  right: 52px;
+  width:200px;
+  font-size:11px;
+  line-height:11px;
+  padding: 7px 7px 7px 7px;
+  border: 2px solid #dfdfdf;
+  border-radius: 5px 5px 5px 5px;
+  font-family: "Benton Sans";
+  color:#303030;
+  text-align:center;
+  z-index:1000;
+
+  @media only screen and (max-width: 660px) {
+    position:static;
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    max-width:250px;
+    text-align:center;
+    margin-top:20px;
+    margin-bottom:20px;
+  }
+
+}
+
+.legend-row {
+  height:14px;
+  margin-bottom:1px;
+}
+
+.legend-row .bar {
+  width:40%;
+  height:10px;
+  float:left;
+}
+
+.legend-row .label {
+  width:58%;
+  float:right;
+  text-align:left;
+  font-weight:normal;
+  line-height:12px;
+
+}
+
+.legend-footer {
+  width:40%;
+  margin-top:5px;
+
+  .label {
+    font-weight:normal;
+    line-height:12px;
+  }
+}
+
+.footer-left {
+  float:left;
+  text-align:left;
+  width:15%;
+}
+
+.footer-right {
+  float:right;
+  text-align:left;
+  width:15%;
+}
+
+.blue {
+  background-image: linear-gradient(to right, white , #0258A0);
+}
+
+.purple {
+  background-image: linear-gradient(to right, white , #874e8e);
+}
+
+.red {
+  background-image: linear-gradient(to right, white , #C0272D);
 }
