@@ -45,8 +45,6 @@ cat mn-pres-precinct-2016.tmp.csv | \
   ndjson-map '{"id": d[0].id, "county_id": d[1].county_id, "precinct_id": d[1].precinct_id, "party": "O", "votes": d[0].votes.reduce((a, b) => a + b, 0), "votes_pct": (d[0].votes.reduce((a, b) => a + b, 0) / d[1].votes_office * 100).toFixed(2), "majority_oth": d[0].votes.reduce((a, b) => a + b, 0) / d[1].votes_office > .5 ? true : false}' | \
   uniq > 'oth.tmp.ndjson' &&
 
-# DEAL WITH "OTHER" ISSUE. ST LOUIS UNORG PRCT 6
-
 echo "Joining and calculating results ..." &&
 ndjson-join 'd.id' <(cat dfl.tmp.ndjson) <(cat r.tmp.ndjson) | \
   ndjson-map '{"id":  d[0].county_id + d[0].precinct_id, "winner": d[0].votes > d[1].votes ? "dfl" : d[0].votes == d[1].votes ? "even" : "r", "winner_margin": d[0].votes > d[1].votes ? d[0].votes_pct - d[1].votes_pct : d[0].votes < d[1].votes ? d[1].votes_pct - d[0].votes_pct : "even", "dfl_votes": parseInt(d[0].votes), "gop_votes": parseInt(d[1].votes), "total_votes": parseInt(d[1].votes) + parseInt(d[0].votes), "dfl_pct": parseFloat(d[0].votes_pct), "gop_pct": parseFloat(d[1].votes_pct)}' | \
@@ -66,18 +64,27 @@ ndjson-join '1' '1' <(ndjson-cat mn-precincts-longlat.tmp.json) <(cat mn-precinc
   ndjson-map '{"type": d[0].type, "bbox": d[0].bbox, "transform": d[0].transform, "objects": {"precincts": {"type": "GeometryCollection", "geometries": d[1].geometries}}, "arcs": d[0].arcs}' > mn-precincts-final.json &&
 topo2geo precincts=mn-precincts-geo.json < mn-precincts-final.json &&
 
-echo "Creating SVG for print ..." &&
+echo "Creating statewide SVG for print ..." &&
 mapshaper mn-precincts-geo.json \
   -quiet \
   -proj +proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs \
   -colorizer name=calcFill colors='#fee0d2,#fc9272,#de2d26,#deebf7,#9ecae1,#3182bd,#dfdfdf,#dfdfdf,#dfdfdf' categories='r-small,r-med,r-large,dfl-small,dfl-med,dfl-large,oth,even,null' \
   -style fill='calcFill(winner_cat)' \
-  -o mn-precincts-2016.svg
+  -o mn-precincts-state-2016.svg &&
 
-# echo "Creating MBtiles for Mapbox upload ..." &&
-# tippecanoe -o ./mapbox/mn_election_results_2016.mbtiles -Z 2 -z 14 --generate-ids ./mn-precincts-geo.json &&
+echo "Creating metro SVG for print ..." &&
+mapshaper mn-precincts-geo.json \
+  -quiet \
+  -filter '"Hennepin,Ramsey,Anoka,Dakota,Carver,Scott,Washington".indexOf(county) > -1' \
+  -proj +proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs \
+  -colorizer name=calcFill colors='#fee0d2,#fc9272,#de2d26,#deebf7,#9ecae1,#3182bd,#dfdfdf,#dfdfdf,#dfdfdf' categories='r-small,r-med,r-large,dfl-small,dfl-med,dfl-large,oth,even,null' \
+  -style fill='calcFill(winner_cat)' \
+  -o mn-precincts-metro-2016.svg &&
 
-echo "Cleaning up ..."
+echo "Creating MBtiles for Mapbox upload ..." &&
+tippecanoe -o ./mapbox/mn_election_results_2016.mbtiles -Z 2 -z 14 --generate-ids ./mn-precincts-geo.json &&
+
+# echo "Cleaning up ..."
 rm *.tmp.csv
 rm *.tmp.json
 rm *.tmp.ndjson
