@@ -2,11 +2,19 @@
 
 Precinct prototype
 
-
-
 ## Publishing
 
-See [docs/publishing.md](./docs/publishing.md).
+Update instructions are as follows:
+
+  - Confirm 2018 precinct results are updated [here](https://electionresults.sos.state.mn.us/Results/MediaResult/115?mediafileid=39). Can also check [here](https://electionresults.sos.state.mn.us/Select/Download/115) if those IDs change.
+
+  - If they are, run `get_results_tiles.sh`. Load `mn-precincts-geo.json` into [mapshaper](https://mapshaper.org/) and spot check results against [these](https://electionresults.sos.state.mn.us/20181106).
+
+  - Once satisfied, upload the tiles file into Mapbox Studio, replacing the old testing tileset. The old style and layer rules should carry over.
+
+  - Check in the Studio editor to be sure all looks good. If so, publish the tiles.
+
+  - Check on the staging page. If all looks good, publish from CMS.
 
 ## Application data
 

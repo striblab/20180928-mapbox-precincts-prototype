@@ -77,6 +77,6 @@ rm *.tmp.csv
 rm *.tmp.json
 rm *.tmp.ndjson
 rm mn-precincts-final.json
-rm mn-precincts-geo.json
+# rm mn-precincts-geo.json
 
 echo "Done!"
