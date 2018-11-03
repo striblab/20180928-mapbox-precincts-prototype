@@ -8,10 +8,11 @@ import utilsFn from './utils.js';
 
 /********** CONSTANTS **********/
 
-const adaptive_ratio = 1.07; // Height/width ratio for adaptive map sizing
-const popover_thresh = 500; // The width of the map when tooltips turn to popovers
 const utils = utilsFn({});
 const isMobile = (window.innerWidth <= popover_thresh || document.body.clientWidth) <= popover_thresh || utils.isMobile();
+
+const adaptive_ratio = utils.isMobile() ? 1.05 : 1.07; // Height/width ratio for adaptive map sizing
+const popover_thresh = 500; // The width of the map when tooltips turn to popovers
 
 // Probably a better way than declaring this up here, but ...
 let popover = new Popover('#map-popover');
@@ -48,11 +49,11 @@ let geocoder = new MapboxGeocoder({
 // Setup basic map controls
 map.keyboard.disable();
 map.addControl(geocoder, 'top-right');
+map.dragPan.disable();
 if (utils.isMobile()) {
   map.dragRotate.disable();
   map.touchZoomRotate.disableRotation();
 } else {
-  map.dragPan.disable();
   map.getCanvas().style.cursor = 'pointer';
   map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 }
@@ -85,10 +86,13 @@ map.on('load', function() {
   });
 
   // Capture mousemove events on desktop and touch on mobile or small viewports
-  if (isMobile) {
-    map.on('click', 'mnprecinctsgeo', function(e) {
-      let f = e.features[0];
+  map.on('click', 'mnprecinctsgeo', function(e) {
+    let f = e.features[0];
 
+    // Highlight precinct on touch
+    map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
+
+    if (isMobile) {
       popover.open(f);
 
       // Scroll into view if popover is off the screen. jQuery assumed to
@@ -99,15 +103,15 @@ map.on('load', function() {
         });
       }
 
-      // Highlight precinct on touch
-      map.setFilter("precincts-highlighted", ['==', 'id', f.properties.id]);
-
       // Zoom and enhance! But only if you're not already zoomed in past 9
       let zoom = map.getZoom() < 9 ? 9 : map.getZoom();
       map.flyTo({center: e.lngLat, zoom: zoom});
-    });
+    }
+
+  });
+
   // Handle mouseover events in desktop and non-mobile viewports
-  } else {
+  if (!isMobile) {
     map.on('mousemove', 'mnprecinctsgeo', function(e) {
       popup.open(e);
     });
