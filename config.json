@@ -1,7 +1,7 @@
 {
   "about this file": "This document defines configuration for this project that is not content or copy.",
 
-  "projectIdentifier": "20180928-mapbox-precincts",
+  "projectIdentifier": "20181106-gov-precincts",
 
   "data": {
     "content": "./content.json",
@@ -33,20 +33,20 @@
   "publish": {
     "default": {
       "bucket": "static.startribune.com",
-      "path": "news/projects-staging/all/20180928-mapbox-precincts",
-      "url": "http://static.startribune.com/news/projects-staging/all/20180928-mapbox-precincts/",
+      "path": "news/projects-staging/all/20181106-gov-precincts",
+      "url": "http://static.startribune.com/news/projects-staging/all/20181106-gov-precincts/",
       "cacheSeconds": 30
     },
     "testing": {
       "bucket": "stribtest-bucket",
-      "path": "news/projects/20180928-mapbox-precincts",
-      "url": "https://s3.amazonaws.com/stribtest-bucket/news/projects/20180928-mapbox-precincts/",
+      "path": "news/projects/20181106-gov-precincts",
+      "url": "https://s3.amazonaws.com/stribtest-bucket/news/projects/20181106-gov-precincts/",
       "cacheSeconds": 30
     },
     "production": {
       "bucket": "static.startribune.com",
-      "path": "news/projects/all/20180928-mapbox-precincts",
-      "url": "http://static.startribune.com/news/projects/all/20180928-mapbox-precincts/",
+      "path": "news/projects/all/20181106-gov-precincts",
+      "url": "http://static.startribune.com/news/projects/all/20181106-gov-precincts/",
       "cacheSeconds": 600
     }
   }
