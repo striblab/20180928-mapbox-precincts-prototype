@@ -9,10 +9,10 @@ import utilsFn from './utils.js';
 /********** CONSTANTS **********/
 
 const utils = utilsFn({});
-const isMobile = (window.innerWidth <= popover_thresh || document.body.clientWidth) <= popover_thresh || utils.isMobile();
-
-const adaptive_ratio = utils.isMobile() ? 1.05 : 1.07; // Height/width ratio for adaptive map sizing
 const popover_thresh = 500; // The width of the map when tooltips turn to popovers
+
+const isMobile = (window.innerWidth <= popover_thresh || document.body.clientWidth) <= popover_thresh || utils.isMobile();
+const adaptive_ratio = utils.isMobile() ? 1.05 : 1.07; // Height/width ratio for adaptive map sizing
 
 // Probably a better way than declaring this up here, but ...
 let popover = new Popover('#map-popover');
