@@ -3,11 +3,12 @@
 # RESULTSURL=https://electionresults.sos.state.mn.us/Results/MediaResult/20?mediafileid=39
 
 # 2016
-YEAR=2016
-RESULTSURL=https://electionresults.sos.state.mn.us/Results/MediaResult/100?mediafileid=52
+# YEAR=2016
+# RESULTSURL=https://electionresults.sos.state.mn.us/Results/MediaResult/100?mediafileid=52
 
 # 2018
-# YEAR=2018
+YEAR=2018
+RESULTSURL=https://electionresults.sos.state.mn.us/Results/MediaResult/115?mediafileid=39
 # RESULTSURL=https://electionresults.sos.state.mn.us/Results/MediaResult/115?mediafileid=39
 
 mkdir -p mapbox &&
