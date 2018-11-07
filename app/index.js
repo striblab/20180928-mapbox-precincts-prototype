@@ -64,6 +64,10 @@ map.on('load', function() {
   // Prep popup
   let popup = new StribPopup(map);
 
+  // Fastclick-circumventing hack. Awful.
+  // https://github.com/mapbox/mapbox-gl-js/issues/2035
+  $(map.getCanvas()).addClass('needsclick');
+
   // This is a layer purely for precinct highlights
   map.addLayer({
     "id": "precincts-highlighted",
